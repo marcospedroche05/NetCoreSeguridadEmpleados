@@ -36,8 +36,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseSession();
 
-app.MapStaticAssets();
-
 app.UseMvc(routes =>
 {
     routes.MapRoute(name: "default",

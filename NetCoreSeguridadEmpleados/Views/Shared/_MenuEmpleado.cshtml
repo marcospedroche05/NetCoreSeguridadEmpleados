@@ -1,0 +1,22 @@
+﻿@if(Context.User.Identity.IsAuthenticated == false)
+{
+    //EFECTO OPTICO DEL LOGIN
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-controller="Empleados" asp-action="PerfilEmpleado">
+            Log In
+        </a>
+    </li>
+} else
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-controller="Managed" asp-action="Logout">
+            Log out
+            <span style="color: blue">@Context.User.Identity.Name</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-controller="Empleados" asp-action="PerfilEmpleado">
+            Mi perfil
+        </a>
+    </li>
+}
