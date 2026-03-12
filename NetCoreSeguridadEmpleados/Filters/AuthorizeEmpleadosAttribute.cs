@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace NetCoreSeguridadEmpleados.Filters
 {
@@ -11,17 +12,34 @@ namespace NetCoreSeguridadEmpleados.Filters
             //POR AHORA, SOLAMENTE NOS INTERESA 
             //VALIDAR SI EXISTE O NO EL EMPLEADO
             var user = context.HttpContext.User;
+            //NECESITAMOS EL ACTION Y EL CONTROLLER DE DONDE EL USUARIO HA PULSADO
+            //PARA ELLO, TENEMOS RouteValues QUE CONTIENE LA INFORMACION
+            //RouteData["controller"]
+            //RouteData["action"]
+            string controller = context.RouteData.Values["controller"].ToString();
+            string action = context.RouteData.Values["action"].ToString();
+            var id = context.RouteData.Values["id"];
+            ITempDataProvider provider = context.HttpContext.RequestServices.GetService<ITempDataProvider>();
+            //ESTA CLASE CONTIENE EL TEMPDATA DE NUESTRA APP
+            var tempData = provider.LoadTempData(context.HttpContext);
+            //ALMACENAMOS LA INFORMACION
+            tempData["controller"] = controller;
+            tempData["action"] = action;
+            //DEBEMOS PREGUNTAR POR EL ID
+            if(id != null)
+            {
+                tempData["id"] = id.ToString();
+            } else
+            {
+                //ELIMINAMOS LA CLAVE PARA QUE NO SE QUEDE ENTRE PETICIONES
+                tempData.Remove("id");
+            }
+                //REASIGNAMOS EL TEMPDATA PARA NUESTRA APP
+                provider.SaveTempData(context.HttpContext, tempData);
+
             if (user.Identity.IsAuthenticated == false)
             {
                 context.Result = GetRoute("Managed", "Login");
-            } else
-            {
-                //COMPROBAMOS LOS ROLES
-                //TENEMOS EN CUENTA MAYUSCULAS/MINUSCULAS
-                if (user.IsInRole("PRESIDENTE") == false && user.IsInRole("DIRECTOR") == false && user.IsInRole("ANALISTA") == false)
-                {
-                    context.Result = this.GetRoute("Managed", "ErrorAcceso");
-                }
             }
         }
 

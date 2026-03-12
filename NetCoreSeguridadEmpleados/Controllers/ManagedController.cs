@@ -28,6 +28,13 @@ namespace NetCoreSeguridadEmpleados.Controllers
             {
                 ClaimsIdentity identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme,
                                                                 ClaimTypes.Name, ClaimTypes.Role);
+                //EMPLEADO ARROYO: 7499 SERA NUESTRO ADMINISTRADOR
+                if(empleado.IdEmpleado == 7499)
+                {
+                    Claim claimAdmin =
+                        new Claim("Admin", "Soy el amo de la empresa");
+                    identity.AddClaim(claimAdmin);
+                }
                 Claim claimName =
                     new Claim(ClaimTypes.Name, username);
                 identity.AddClaim(claimName);
@@ -48,8 +55,17 @@ namespace NetCoreSeguridadEmpleados.Controllers
                     new ClaimsPrincipal(identity);
                 await HttpContext.SignInAsync
                     (CookieAuthenticationDefaults.AuthenticationScheme, userPrincipal);
-                //POR AHORA LO ENVIAMOS A UNA VISTA QUE HAREMOS EN BREVE
-                return RedirectToAction("PerfilEmpleado", "Empleados");
+                string controller = TempData["controller"].ToString();
+                string action = TempData["action"].ToString();
+                if (TempData["id"] != null)
+                {
+                    string id = TempData["id"].ToString();
+                    return RedirectToAction(action, controller, new { id = id });
+                } else
+                {
+                    //POR AHORA LO ENVIAMOS A UNA VISTA QUE HAREMOS EN BREVE
+                    return RedirectToAction(action, controller);
+                }
             } else
             {
                 ViewData["MENSAJE"] = "Credenciales incorrectas";

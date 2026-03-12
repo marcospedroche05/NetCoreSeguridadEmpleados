@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using NetCoreSeguridadEmpleados.Data;
+using NetCoreSeguridadEmpleados.Policies;
 using NetCoreSeguridadEmpleados.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,13 +12,29 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-}).AddCookie();
+}).AddCookie(
+    CookieAuthenticationDefaults.AuthenticationScheme,
+    config =>
+    {
+        config.AccessDeniedPath = "/Managed/ErrorAcceso";
+    });
+
+//LAS POLITICAS SE AGREGAN CON AUTHORIZATION
+builder.Services.AddAuthorization(options =>
+{
+    //DEBEMOS CREAR LAS POLICIES QUE NECESITEMOS PARA LOS ROLES
+    options.AddPolicy("SOLOJEFES", policy => policy.RequireRole("PRESIDENTE", "DIRECTOR", "ANALISTA"));
+    options.AddPolicy("AdminOnly", policy => policy.RequireClaim("Admin"));
+    options.AddPolicy("SoloRicos", policy => policy.Requirements.Add(new OverSalarioRequirement()));
+    options.AddPolicy("SUBORDINADOS", policy => policy.Requirements.Add(new OverDirectorRequirement()));
+});
 
 // Add services to the container.
 string connectionString = builder.Configuration.GetConnectionString("SqlHospital");
 builder.Services.AddTransient<RepositoryHospital>();
 builder.Services.AddDbContext<HospitalContext>(options => options.UseSqlServer(connectionString));
-builder.Services.AddControllersWithViews(options => options.EnableEndpointRouting = false);
+builder.Services.AddControllersWithViews(options => options.EnableEndpointRouting = false)
+    .AddSessionStateTempDataProvider();
 
 var app = builder.Build();
 

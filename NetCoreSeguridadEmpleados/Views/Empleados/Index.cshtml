@@ -49,8 +49,11 @@
                 @Html.DisplayFor(modelItem => item.IdDepartamento)
             </td>
             <td>
-                <a asp-controller="Empleados" asp-action="Details" asp-route-idempleado="@item.IdEmpleado">
+                <a asp-controller="Empleados" asp-action="Details" asp-route-id="@item.IdEmpleado">
                     Detalles
+                </a>
+                <a asp-controller="Empleados" asp-action="Delete" asp-route-id="@item.IdEmpleado">
+                    Eliminar
                 </a>
             </td>
         </tr>
